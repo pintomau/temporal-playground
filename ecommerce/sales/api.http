@@ -1,0 +1,55 @@
+### Create Cart
+
+POST https://localhost:8080/sales/cart
+
+> {%
+  client.global.set("cartId", response.body.id)
+  client.global.set("cartVersion", response.body.version)
+%}
+
+### Add Line Item Workflow
+
+POST https://localhost:8080/sales/{{cartId}}/add-line-item
+Content-Type: application/json
+
+{
+  "version": {{cartVersion}},
+  "productId": "{{$uuid}}",
+  "requestId": "{{$uuid}}"
+}
+
+### Fetch Sales Cart
+
+GET https://localhost:8080/sales/cart/{{cartId}}
+
+> {%
+  client.global.set("cartId", response.body.id)
+  client.global.set("cartVersion", response.body.version)
+%}
+
+### Fetch Warehouse Cart
+
+GET http://localhost:8081/warehouse/carts/{{cartId}}
+
+### Fetch Marketing Cart
+
+GET http://localhost:8082/marketing/carts/{{cartId}}
+
+### Remove Warehouse Cart Line Item
+
+POST http://localhost:8081/warehouse/carts/{{cartId}}/remove-line-item
+Content-Type: application/json
+
+{
+  "lineItemId": ""
+}
+
+### Send Message
+
+POST http://localhost:8080/sales/send-message/123
+Content-Type: application/json
+
+{
+  "name": "LineItemAdded",
+  "data": "Line item added"
+}

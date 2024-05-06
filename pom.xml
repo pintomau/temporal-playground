@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.3</version>
+    <version>3.2.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -23,18 +23,16 @@
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <temporal.version>1.23.0</temporal.version>
+    <temporal.version>1.23.2</temporal.version>
     <feign.version>13.2.1</feign.version>
-    <htmx-thymeleaf.version>3.2.0</htmx-thymeleaf.version>
+    <htmx-thymeleaf.version>3.3.0</htmx-thymeleaf.version>
     <spotless.version>2.43.0</spotless.version>
     <kotlin-logging.version>6.0.3</kotlin-logging.version>
   </properties>
 
   <modules>
-    <module>marketing</module>
-    <module>sales</module>
-    <module>warehouse</module>
     <module>banking</module>
+    <module>ecommerce</module>
   </modules>
 
   <dependencyManagement>

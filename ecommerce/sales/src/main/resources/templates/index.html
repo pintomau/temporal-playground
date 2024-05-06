@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Hello</title>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/sse.js"></script>
+
+</head>
+<body>
+<h2>Latest event</h2>
+<div hx-ext="sse" sse-connect="/sales/subscribe/123" sse-swap="AddLineItemStarted,LineItemAdded">
+</div>
+
+<h2>Event Log</h2>
+<div id="event-log"></div>
+
+<script>
+  const eventLog = document.getElementById("event-log");
+
+  /**
+   * @param {MessageEvent} msgEvent
+   */
+  function prependToLog(msgEvent) {
+    const p = document.createElement("p")
+    p.textContent = msgEvent.data
+    eventLog.prepend(p)
+  }
+
+  function serverEventHandler() {
+    document.body.addEventListener('htmx:sseMessage', ev => {
+      const msg = ev.detail
+      switch (msg.type) {
+        case 'AddLineItemStarted':
+          // do something with this specific type
+          prependToLog(msg)
+          break
+        case 'LineItemAdded':
+          // do something with this specific type
+          prependToLog(msg)
+          break
+      }
+    })
+    // const evtSource = new EventSource("/sales/subscribe/123")
+    // evtSource.addEventListener("AddLineItemStarted", ev => {
+    //   prependToLog(ev)
+    // });
+  }
+
+  serverEventHandler()
+</script>
+</body>
+</html>

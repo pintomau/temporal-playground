@@ -1,0 +1,39 @@
+server:
+  servlet:
+    context-path: /${spring.application.name}
+
+  http2:
+    enabled: true
+
+  ssl:
+    key-store-type: PKCS12
+    key-store: classpath:keystore/temporal.p12
+    key-store-password: testtest
+    key-alias: temporal
+    enabled: true
+
+spring:
+  application:
+    name: sales
+
+  temporal:
+    namespace: ${spring.application.name}
+    connection:
+      target: 127.0.0.1:7233
+    workersAutoDiscovery:
+      packages: com.pintomau.temporalspring
+
+  data:
+    mongodb:
+      database: ${spring.application.name}
+
+  threads:
+    virtual:
+      enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        transaction:
+          interceptor: TRACE

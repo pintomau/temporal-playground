@@ -1,0 +1,12 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /${spring.application.name}
+
+spring:
+  application:
+    name: marketing
+
+  data:
+    mongodb:
+      database: ${spring.application.name}

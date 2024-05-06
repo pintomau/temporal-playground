@@ -99,6 +99,9 @@ However, the implementer still needs to ensure consumer idempotency.
 
 You can find an example Temporal implementation in [Transfer.kt](banking/middle-bank/src/main/kotlin/com/pintomau/temporalspring/banking/middlebank/features/Transfer.kt).
 
+You can use the example requests available in [api.http](banking/middle-bank/api.http).
+You can trigger these requests within IntelliJ or on your own.
+
 When using message brokers like RabbitMQ or Kafka, the default implementation is optimistic and fire-and-forget,
 which means that there is no guarantee that messages are persisted or received.
 To ensure reliable messaging, read up on Publisher Confirms:
@@ -116,3 +119,102 @@ account, not the response at the time the request was processed. The implementat
 #### Transfer Report
 
 We also provide an example of an always-running workflow in [TransferReport.kt](banking/middle-bank/src/main/kotlin/com/pintomau/temporalspring/banking/middlebank/features/TransferReport.kt).
+
+## [E-Commerce case study](ecommerce)
+
+This is just an exercise on how to achieve a more decoupled system as suggested in Mauro Servienti's 
+[talk](https://youtu.be/KkzvQSuYd5I) and demos https://github.com/mauroservienti/all-our-aggregates-are-wrong-demos.
+
+Many projects tend to create a huge Aggregate Root that contains data and drives logic from other domains.
+This makes it hard for domains to be truly autonomous. The example provided in the talk is a clear example:
+How can a domain that handles pricing change and notify price changes within the Cart? See the talk for the answer.
+
+In this demo, we use Temporal to ensure that all domains are notified by changes to the cart,
+driven by the sales domain.
+
+With this example, the sales domain still needs to know which domains want to participate in a checkout, but doesn't
+need to concern itself with domain logic or storage details.
+An interface for the message still needs to be defined across domains.
+
+In this example, we fan-out HTTP request to the downstream domains, but the same could be achieved using a message bus.
+In this case, Temporal ensures the messages get to all consumers, concurrently, and rolls back in case an error occurs
+in any of them.
+
+Additionally, we also make use of Server Sent Events (SSE) to notify the customer of progress,
+since we made this process asynchronous.
+Alternatively, we could wait for the request to finish, use long polling, or use web sockets.
+
+Idempotency is guaranteed by Sales. We also make use of Optimistic Concurrency.
+
+The most relevant code can be found in the
+[AddLineItem.kt](ecommerce/sales/src/main/kotlin/com/pintomau/temporalspring/sales/features/AddLineItem.kt)
+vertical slice.
+
+You can use the example requests available in [api.http](ecommerce/sales/api.http).
+You can trigger these requests within IntelliJ or on your own.
+
+To check the Server Sent Events, open https://localhost:8080/sales/app.
+
+The high-level sequence looks like so:
+
+```mermaid
+sequenceDiagram
+  participant c as Customer
+  participant s as Sales
+  participant m as Marketing
+  participant w as Warehouse
+  participant rmk as RabbitMQ
+  participant rmkl as Listener
+  participant sse as Server Sent Events
+
+  c ->> s: add line item(cartId, cartVersion, sku, reqId)
+  s ->> rmk: Adding line item started
+  par send notification
+    note over rmk: this is done off process and off temporal
+    rmk ->> rmkl: push message
+    rmkl ->> sse: send message
+    sse ->> c: notify
+  end
+
+  s ->> s: add line item
+
+  par 
+    s ->> m: add line item
+  and
+    s ->> w: add line item
+  end
+  alt errors?
+    s ->> m: remove line item
+    s ->> w: remove line item
+  end
+    
+  s ->> rmk: Line Item added
+  par send notification
+    note over rmk: this is done off process and off temporal
+    rmk ->> rmkl: push message
+    rmkl ->> sse: send message
+    sse ->> c: notify
+  end
+
+```
+
+### On compensations
+
+In Mauro's talk, he proposes to send a generic compensation command to the consumers with the request id, such as:
+
+`CleanUpFailedCartRequest`
+```json
+{
+  "cartId": "{{cart-id}}",
+  "requestId": "{{request-id}}"
+}
+```
+
+In the example we show here, we're not as generic, and our sales domain actually knows what each other's domains'
+compensation actions are.
+
+Of course, this is just a thought exercise, and could be done either way.
+
+On one hand, the approach shown here doesn't require downstream systems to keep a history of requests done on them.
+On the other, some domain knowledge leakage may be happening here, which may have repercussions on more
+involved systems.

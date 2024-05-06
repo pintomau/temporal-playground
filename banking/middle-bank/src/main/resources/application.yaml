@@ -1,0 +1,20 @@
+server:
+  servlet:
+    context-path: /${spring.application.name}
+
+spring:
+  application:
+    name: middle-bank
+
+  threads:
+    virtual:
+      enabled: true
+
+  temporal:
+    namespace: ${spring.application.name}
+    connection:
+      target: 127.0.0.1:7233
+    workersAutoDiscovery:
+      packages: com.pintomau.temporalspring
+
+

@@ -1,0 +1,28 @@
+### Create Account
+
+POST http://localhost:8082/bank-b
+
+
+> {%
+  client.global.set("id", response.body.id)
+%}
+
+### Deposit
+
+POST http://localhost:8082/bank-b/{{id}}/deposit
+Content-Type: application/json
+
+{
+  "amount": 10.50,
+  "requestId": "{{$uuid}}"
+}
+
+### Withdraw
+
+POST http://localhost:8082/bank-b/{{id}}/withdraw
+Content-Type: application/json
+
+{
+  "amount": 10.50,
+  "requestId": "{{$uuid}}"
+}

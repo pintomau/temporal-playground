@@ -1,0 +1,29 @@
+### Create Account in Bank A
+
+POST http://localhost:8081/bank-a
+
+> {%
+  client.global.set("bankAId", response.body.id)
+%}
+
+### Create Account in Bank B
+
+POST http://localhost:8082/bank-b
+
+> {%
+  client.global.set("bankBId", response.body.id)
+%}
+
+### Transfer
+
+POST http://localhost:8080/middle-bank/transfer
+Content-Type: application/json
+
+{
+  "fromBank": "A",
+  "fromAccount": "{{bankAId}}",
+  "toBank": "B",
+  "toAccount": "{{bankBId}}",
+  "amount": 100.5,
+  "requestId": "{{$uuid}}"
+}

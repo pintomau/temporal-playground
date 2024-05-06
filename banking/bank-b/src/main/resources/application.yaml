@@ -1,0 +1,17 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /${spring.application.name}
+
+spring:
+  application:
+    name: bank-b
+
+  threads:
+    virtual:
+      enabled: true
+
+  data:
+    mongodb:
+      database: ${spring.application.name}
+      uri: mongodb://localhost:27017

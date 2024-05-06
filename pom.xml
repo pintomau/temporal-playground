@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.3</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
+  <groupId>com.pintomau.temporalspring</groupId>
+  <artifactId>temporal-thing</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <java.version>21</java.version>
+    <kotlin.version>1.9.23</kotlin.version>
+    <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <temporal.version>1.23.0</temporal.version>
+    <feign.version>13.2.1</feign.version>
+    <htmx-thymeleaf.version>3.2.0</htmx-thymeleaf.version>
+    <spotless.version>2.43.0</spotless.version>
+    <kotlin-logging.version>6.0.3</kotlin-logging.version>
+  </properties>
+
+  <modules>
+    <module>marketing</module>
+    <module>sales</module>
+    <module>warehouse</module>
+    <module>banking</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.wimdeblauwe</groupId>
+        <artifactId>htmx-spring-boot-thymeleaf</artifactId>
+        <version>${htmx-thymeleaf.version}</version>
+      </dependency>
+
+      <!-- region Logging -->
+      <dependency>
+        <groupId>io.github.oshai</groupId>
+        <artifactId>kotlin-logging-jvm</artifactId>
+        <version>${kotlin-logging.version}</version>
+      </dependency>
+      <!-- endregion -->
+
+      <!-- region BOMs -->
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-bom</artifactId>
+        <version>${feign.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.temporal</groupId>
+        <artifactId>temporal-bom</artifactId>
+        <version>${temporal.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- endregion -->
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+
+        <executions>
+          <execution>
+            <goals>
+              <goal>apply</goal>
+            </goals>
+            <phase>compile</phase>
+          </execution>
+        </executions>
+
+        <configuration>
+          <kotlin>
+            <includes>
+              <include>src/**/*.kt</include>
+            </includes>
+
+            <ktlint>
+              <editorConfigOverride>
+                <ktlint_standard_package-name>disabled</ktlint_standard_package-name>
+                <!-- https://pinterest.github.io/ktlint/latest/faq/#why-is-wildcard-import-javautil-not-reported-by-the-no-wildcard-imports-rule-->
+                <ktlint_standard_no-wildcard-imports>disabled</ktlint_standard_no-wildcard-imports>
+              </editorConfigOverride>
+            </ktlint>
+
+            <ktfmt>
+              <!-- optional, other options are DROPBOX, GOOGLE and KOTLINLANG -->
+              <style>GOOGLE</style>
+            </ktfmt>
+          </kotlin>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
